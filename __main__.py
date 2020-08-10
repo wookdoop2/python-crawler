@@ -6,6 +6,16 @@ from bs4 import BeautifulSoup
 from collection import crawler
 
 
+def crawling_nene():
+    url = "https://nenechicken.com/17_new/sub_shop01.asp?page=1&ex_select=1&ex_select2=&IndexSword=&GUBUN=A"
+    html = crawler.crawling(url)
+    # print(html)
+
+    bs = BeautifulSoup(html, "html.parser")
+    tag_table = bs.findAll("div", attrs={"class": ["shopInfo"]})
+    print(tag_table)
+
+
 def crawling_pelicana():
     # result = list()
     result = []
@@ -47,7 +57,37 @@ def crawling_pelicana():
 
 
 def crawling_kyochon():
-    pass
+    result = []
+    for sido1 in range(1, 18):
+        for sido2 in count(start=1, step=1):
+            url = "http://www.kyochon.com/shop/domestic.asp?sido1=%d&sido2=%d&txtsearch=" % (sido1, sido2)
+            html = crawler.crawling(url)
+            # print(html)
+
+            if html is None:
+                break
+
+            bs = BeautifulSoup(html, "html.parser")
+            tag_ul = bs.find("ul", attrs={"class": "list"})
+            tags_span = tag_ul.findAll("span", attrs={"class": "store_item"})
+
+            for tag_span in tags_span:
+                strings = list(tag_span.strings)
+                # print(strings)
+
+                name = strings[1];
+                address = strings[3].strip("\r\n\t")
+
+                sidogu = address.split()[0:2]
+                t = (name, address) + tuple(sidogu)
+                # print(t)
+                result.append(t)
+    print(result)
+
+    # store
+    table = pd.DataFrame(result, columns=["name", "address", "sido", "gigun"])
+    table.to_csv("results/kyochon.csv", encoding="utf-8", mode="w", index=True)
+
 
 
 def crawling_goobne():
@@ -56,10 +96,12 @@ def crawling_goobne():
 
 if __name__ == "__main__":
     # pelicana
-    crawling_pelicana()
+    # crawling_pelicana()
 
-    # nene
+    # nene (assignment)
+    # crawling_nene()
 
     # kyochon
+    crawling_kyochon()
 
     # goobne
