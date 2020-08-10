@@ -11,7 +11,7 @@ def crawling(url="", encoding="utf-8", err=lambda e: print(f"{e} : {datetime.now
         print(f"{datetime.now()}: success for request[{url}]")
         receive = response.read()
 
-        return receive.decode(encoding)
+        return receive.decode(encoding, errors="replace")
 
     except Exception as e:
         if err is not None:
