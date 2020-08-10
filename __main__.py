@@ -7,13 +7,29 @@ from collection import crawler
 
 
 def crawling_nene():
-    url = "https://nenechicken.com/17_new/sub_shop01.asp?page=1&ex_select=1&ex_select2=&IndexSword=&GUBUN=A"
-    html = crawler.crawling(url)
-    # print(html)
+    result = []
+    for page in range(1, 48):
+        url = "https://nenechicken.com/17_new/sub_shop01.asp?page=%d&ex_select=1&ex_select2=&IndexSword=&GUBUN=A" % page
+        html = crawler.crawling(url)
+        # print(html)
 
-    bs = BeautifulSoup(html, "html.parser")
-    tag_table = bs.findAll("div", attrs={"class": ["shopInfo"]})
-    print(tag_table)
+        bs = BeautifulSoup(html, "html.parser")
+        tag_div = bs.find("div", attrs={"class": "shopWrap"})
+        tags_div0 = tag_div.findAll("div", attrs={"class": "shopName"})
+        tags_div1 = tag_div.findAll("div", attrs={"class": "shopAdd"})
+
+        for i in range(0, len(tags_div0)):
+            strings0 = list(tags_div0[i].strings)
+            strings1 = list(tags_div1[i].strings)
+
+            t = (strings0[0], strings1[0]) + tuple(strings1[0].split()[0:2])
+            result.append(t)
+
+    print(result)
+
+    # store
+    table = pd.DataFrame(result, columns=["name", "address", "sido", "gigun"])
+    table.to_csv("results/nene.csv", encoding="utf-8", mode="w", index=True)
 
 
 def crawling_pelicana():
@@ -53,7 +69,7 @@ def crawling_pelicana():
 
     # store
     table = pd.DataFrame(result, columns=["name", "address", "sido", "gigun"])
-    table.to_csv("results/pelicana.csv", encoding="utf-8", mode="w", index=True)
+    table.to_csv("results/pelicana.csv", encoding="UTF-8", mode="w", index=True)
 
 
 def crawling_kyochon():
@@ -89,7 +105,6 @@ def crawling_kyochon():
     table.to_csv("results/kyochon.csv", encoding="utf-8", mode="w", index=True)
 
 
-
 def crawling_goobne():
     print("crawling_goobne")
 
@@ -99,9 +114,9 @@ if __name__ == "__main__":
     # crawling_pelicana()
 
     # nene (assignment)
-    # crawling_nene()
+    crawling_nene()
 
     # kyochon
-    crawling_kyochon()
+    # crawling_kyochon()
 
     # goobne
