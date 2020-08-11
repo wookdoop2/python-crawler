@@ -109,6 +109,7 @@ def crawling_kyochon():
 
 
 def crawling_goobne():
+    result = []
     url = "https://www.goobne.co.kr/store/search_store.jsp"
 
     # 첫 페이지 로딩
@@ -116,15 +117,42 @@ def crawling_goobne():
     wd.get(url)
     time.sleep(3)
 
-    # Javascript 실행
-    script = "store.getList(1)"
-    wd.execute_script(script)
-    print(f"{datetime.now()} : success for request[{script}]")
-    time.sleep(2)
+    for page in count(start=1, step=1):
+        # Javascript 실행
+        script = "store.getList(%d)" % page
+        wd.execute_script(script)
+        print(f"{datetime.now()} : success for request[{script}]")
+        time.sleep(2)
 
-    # Javascript 실행 결과 HTML(동적으로 rendering 된 HTML) 가져오기
-    html = wd.page_source
-    print(html)
+        # Javascript 실행 결과 HTML(동적으로 rendering 된 HTML) 가져오기
+        html = wd.page_source
+
+        # parsing with bs4
+        bs = BeautifulSoup(html, "html.parser")
+        tag_tbody = bs.find("tbody", attrs={"id": "store_list"})
+        tags_tr = tag_tbody.findAll("tr")
+
+        # 끝 검출
+
+        if tags_tr[0].get("class") is None:
+            break
+
+        for tag_tr in tags_tr:
+            strings = list(tag_tr.strings)
+            # print(strings)
+            name = strings[1]
+            address = strings[6]
+            sidogu = address.split()[0:2]
+
+            t = (name, address) + tuple(sidogu)
+            result.append(t)
+
+    # print(result)
+    wd.quit()
+
+    # store
+    table = pd.DataFrame(result, columns=["name", "address", "sido", "gigun"])
+    table.to_csv("results/goobne.csv", encoding="utf-8", mode="w", index=True)
 
 
 if __name__ == "__main__":
