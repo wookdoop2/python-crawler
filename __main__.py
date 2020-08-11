@@ -1,7 +1,10 @@
+import time
+from datetime import datetime
 from itertools import count
 import pandas as pd
 
 from bs4 import BeautifulSoup
+from selenium import webdriver
 
 from collection import crawler
 
@@ -106,7 +109,22 @@ def crawling_kyochon():
 
 
 def crawling_goobne():
-    print("crawling_goobne")
+    url = "https://www.goobne.co.kr/store/search_store.jsp"
+
+    # 첫 페이지 로딩
+    wd = webdriver.Chrome("C:\\bit2020\\chromedriver_win32\\chromedriver.exe")
+    wd.get(url)
+    time.sleep(3)
+
+    # Javascript 실행
+    script = "store.getList(1)"
+    wd.execute_script(script)
+    print(f"{datetime.now()} : success for request[{script}]")
+    time.sleep(2)
+
+    # Javascript 실행 결과 HTML(동적으로 rendering 된 HTML) 가져오기
+    html = wd.page_source
+    print(html)
 
 
 if __name__ == "__main__":
@@ -114,9 +132,10 @@ if __name__ == "__main__":
     # crawling_pelicana()
 
     # nene (assignment)
-    crawling_nene()
+    # crawling_nene()
 
     # kyochon
     # crawling_kyochon()
 
     # goobne
+    crawling_goobne()
